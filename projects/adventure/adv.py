@@ -36,10 +36,12 @@ traversalRooms = {}
 backtrack_stack = []
 
 traversalMaze = True
+visited_set = set()
 
-while traversalMaze:
+while len(visited_set) < 500:
     # get the current_room we are in
     current_room = player.currentRoom.id
+    visited_set.add(current_room)
     print(f"Current room: {current_room} - Explored {len(traversalRooms)} rooms, {len(traversalPath)} steps")
     # if the room we are in doesnt exist on the graph yet
     # lets add the exits object to it
@@ -72,6 +74,44 @@ while traversalMaze:
             traversalRooms[room_to_the_north]["s"] = current_room
         # add it to the backtrack stack
         backtrack_stack.append('s')
+    elif "e" in all_current_exits and all_current_exits["e"] == "?":
+        # rinse and repeat with the algo on south and north
+        # print('east')
+        traversalPath.append("e")
+        player.travel("e")
+        # print('debugging')
+        room_to_the_east = player.currentRoom.id
+        traversalRooms[current_room]["e"] = room_to_the_east
+        if room_to_the_east not in traversalRooms:
+            room_to_the_east_exits = {}
+            for exit in player.currentRoom.getExits():
+                room_to_the_east_exits[exit] = "?"
+            room_to_the_east_exits["w"] = current_room
+            traversalRooms[room_to_the_east] = room_to_the_east_exits
+        else:
+            # else if it does exist already
+            traversalRooms[room_to_the_east]["w"] = current_room
+        # add it to the backtrack stack
+        backtrack_stack.append('w')
+    elif "w" in all_current_exits and all_current_exits["w"] == "?":
+        # rinse and repeat with the algo on south and north
+        # print('west')
+        player.travel("w")
+        traversalPath.append("w")
+        # print('debugging')
+        room_to_the_west = player.currentRoom.id
+        traversalRooms[current_room]["w"] = room_to_the_west
+        if room_to_the_west not in traversalRooms:
+            room_to_the_west_exits = {}
+            for exit in player.currentRoom.getExits():
+                room_to_the_west_exits[exit] = "?"
+            room_to_the_west_exits["e"] = current_room
+            traversalRooms[room_to_the_west] = room_to_the_west_exits
+        else:
+            # else if it does exist already
+            traversalRooms[room_to_the_west]["e"] = current_room
+        # add it to the backtrack stack
+        backtrack_stack.append('e')
     elif "s" in all_current_exits and all_current_exits["s"] == "?":
         # print('south')
         # travel to the south since south exists
@@ -92,44 +132,6 @@ while traversalMaze:
             traversalRooms[room_to_the_south]["n"] = current_room
         # add it to the backtrack stack
         backtrack_stack.append('n')
-    elif "w" in all_current_exits and all_current_exits["w"] == "?":
-        # rinse and repeat with the algo on south and north
-        # print('west')
-        player.travel("w")
-        traversalPath.append("w")
-        # print('debugging')
-        room_to_the_west = player.currentRoom.id
-        traversalRooms[current_room]["w"] = room_to_the_west
-        if room_to_the_west not in traversalRooms:
-            room_to_the_west_exits = {}
-            for exit in player.currentRoom.getExits():
-                room_to_the_west_exits[exit] = "?"
-            room_to_the_west_exits["e"] = current_room
-            traversalRooms[room_to_the_west] = room_to_the_west_exits
-        else:
-            # else if it does exist already
-            traversalRooms[room_to_the_west]["e"] = current_room
-        # add it to the backtrack stack
-        backtrack_stack.append('e')
-    elif "e" in all_current_exits and all_current_exits["e"] == "?":
-        # rinse and repeat with the algo on south and north
-        # print('east')
-        traversalPath.append("e")
-        player.travel("e")
-        # print('debugging')
-        room_to_the_east = player.currentRoom.id
-        traversalRooms[current_room]["e"] = room_to_the_east
-        if room_to_the_east not in traversalRooms:
-            room_to_the_east_exits = {}
-            for exit in player.currentRoom.getExits():
-                room_to_the_east_exits[exit] = "?"
-            room_to_the_east_exits["w"] = current_room
-            traversalRooms[room_to_the_east] = room_to_the_east_exits
-        else:
-            # else if it does exist already
-            traversalRooms[room_to_the_east]["w"] = current_room
-        # add it to the backtrack stack
-        backtrack_stack.append('w')
     else:
         # if we have no backtrack to do we will break the while loop
         if len(backtrack_stack) == 0:
@@ -143,6 +145,7 @@ while traversalMaze:
             player.travel(path_to_backtrack_travel)
             traversalPath.append(path_to_backtrack_travel)
 
+print(len(visited_set),'This is the length')
 
 # # TRAVERSAL TEST
 visited_rooms = set()
